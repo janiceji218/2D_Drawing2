@@ -33,7 +33,7 @@ var common_config = {
     resolve: {
         extensions: ["*", ".js", ".jsx"],
         alias: {
-            AniGraph: path.resolve(__dirname, '../AniGraph/')
+            AniGraph: path.resolve(__dirname, '../AniGraphV2/')
         },
         modules: [path.resolve(__dirname, '../node_modules')]
     },

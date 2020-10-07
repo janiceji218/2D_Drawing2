@@ -17,7 +17,7 @@ import {
     VecListToBeCloseTo,
     SquareVerts,
     AComponentTest
-} from "AniGraph/src"
+} from "AniGraph"
 expect.extend(VecListToBeCloseTo)
 //////////////////////////////////////////////
 
