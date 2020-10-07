@@ -22,13 +22,13 @@ Suppose I have the following tree, containing three shapes with the given matrix
 root (identity matrix)
  |
  + circle  p=(1,2) r=90 s=(1,1) a=(-1,0)
- |
- + triangle p=(0,0) r=180 s=(1,2) a=(0,-1)
-    |
-    + square p=(0,1) r=0 s=(1, 1/2) a=(0,0)
+   |
+   + triangle p=(0,0) r=180 s=(1,2) a=(0,-1)
+     |
+     + square p=(0,1) r=0 s=(1, 1/2) a=(0,0)
 ~~~
 
-(In this diagram circle and triangle are children of the root, and square is a child of triangle.  The letters p, r, s, and a stand for position, rotation, scale, and anchor shift.)
+(In this diagram circle is a child of the root, triangle is a child of circle, and square is a child of triangle.  The letters p, r, s, and a stand for position, rotation, scale, and anchor shift.)
 
 These objects in their local coordinates have the dimensions shown here:
 
