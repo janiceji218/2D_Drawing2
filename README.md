@@ -1,6 +1,10 @@
+#### IMPORTANT: You should fork the code for this repo to make it easy for us to distribute test cases and practice problems for this assignment. Directions on how to fork the repo can be found in [`./forking.md`](./forking.md).
+----
+
+
 # CS 4620 Assignment 2
 
-### IMPORTANT: You should fork the code for this repo to make it easy for us to distribute test cases and practice problems for this assignment. Directions on how to fork the repo can be found in [`./forking.md`](./forking.md).
+
 
 In Assignment 1 you implemented controllers for manipulating a single object in a 2D drawing.  In this assignment, we will take it up a notch by extending our drawing application to support hierarchical 2D models. These hierarchical models will become the basis for 2D animations later on.
 
