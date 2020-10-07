@@ -1,0 +1,3 @@
+[submodule "AniGraphV2"]
+	path = AniGraphV2
+	url = https://github.coecis.cornell.edu/CS4620-F2020/AniGraphV2.git
