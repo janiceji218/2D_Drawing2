@@ -8,7 +8,7 @@
 
 In Assignment 1 you implemented controllers for manipulating a single object in a 2D drawing.  In this assignment, we will take it up a notch by extending our drawing application to support hierarchical 2D models. These hierarchical models will become the basis for 2D animations later on.
 
-The idea of transformation hierarchies is to factor objects and scenes into parts and subparts where that can all be edited and moved in an organized way. 
+The idea of transformation hierarchies is to factor objects and scenes into parts and subparts that can all be edited and moved in an organized way. 
 In principle, extending the models we used in A1 to support hierarchies is straightforward&mdash;in fact, the `AModel` base class already supports basic child-parent relationships. However, to give these relationships meaning, we need to ensure that each node inherits the effects of transformations applied to its ancestors. This brings us to the core of Assignment 2, which has two parts:
  - First, we will extend the model class we built in Assignment 1 to handle transformations in a hierarchical manner.
  - Second, we will extend the tools we offer users to make manipulating transformation hierarchies (i.e., a scene graph) easier. This will involve writing new controllers and support for simple scene graph operations.
@@ -44,24 +44,37 @@ One additional feature of the starter code is a scene graph editor that appears 
 In this assignment we ask you to add additional functionality for editing the scene graph:
 
 - The user can rearrange the structure of the scene graph by dragging and dropping nodes in the graph editor to change which node is the parent of the dragged node.
-- The user can use the *GroupChildren* command to create a new group that contains the children of the selected node.  This means creating an empty group node, moving all children of the selected node to become children of the group, and making the group a child of the selected node. The anchor of this newly created node is in the center of its bounding box.
+- The user can use the *GroupChildren* command to create a new group that contains the children of the selected node.  This means creating an empty group node, moving all children of the selected node to become children of the group, and making the group a child of the selected node. The anchor of this newly created node should be placed at the center of a bounding box that contains all of its children (or at the same location as the parent's anchor, if there are no children with geometry).
 - The user can select a node with children and use the *UngroupChildren* command to turn those children into siblings of the selected node. If UngroupChildren is used on a group node then that node is deleted once its children have been moved.
 
-In all these scene graph operations, your code should follow the Golden Rule:
+#### A Guiding Principle for Scene Graph Edits
 
-> When you edit the scene graph, the scene does not change.
+In all these scene graph operations, your code should attempt to follow the Golden Rule:
 
-This means that before and after the scene graph edit (a reparenting, grouping, or ungrouping operation), the object-to-world matrices of all objects should remain unchanged.
+> Whenever possible, edits to the scene graph should not change the scene geometry or location of anchor points.
 
-There is one exception to the Golden Rule, though.  The rule implies a particular matrix for an object whose parent changes, and it's possible that that matrix cannot be represented as a product of rotation, scale, and translation.  In particular, this happens when you have nonuniform scales above rotations in the hierarchy, which can cause the first two columns of the matrix not to be orthogonal vectors.  In that case it is fine to let updateMatrixProperties do its thing, and the matrix will change.
+This means that before and after a change to the structure of our scene graph (e.g., a reparenting, grouping, or ungrouping operation), the following two properties should hold:
+ - The object-to-world matrices of all objects should remain unchanged.
+ - The graph edit should not change the location of the anchor point in world space. 
 
-Furthermore, we also ask you to improve the functionality of the controller that lets the user manipulate the transformations of objets:
 
-- When models (whether objects or groups) are selected, the user can manipulate them using the same selection-box controls as in the starter code.  In all cases, the user sees a bounding box surrounding the shapes being manipulated, and manipulating the selection box handles and the anchor results in changes to the transformation of the selected model that are consistent with the user input.
+There is an acception to these criteria, though; it is the reason why our rule contains the phrase "whenever possible." Recall that the matrices we use are mapped to a set of properties: position, rotation, scale, and anchor shift. These properties provide fewer degrees of freedom than an arbitrary matrix---and, importantly, fewer degrees of freedom in a single transformation than one can achieve by chaining multiple transformations together. In other words, there are matrices we can represent as the product of PRSA transformations that cannot be represented in one such transformation alone. In such cases, it may be impossible to preserve the geometry of a model when reducing the number of ancestors it has in our scene graph. In particular, this happens when you have nonuniform scales above rotations in the hierarchy, which can cause the first two columns of the matrix not to be orthogonal vectors.  In that case it is fine to let updateMatrixProperties do its thing, which may create an abrupt change in geometry.  \[Side note: for this reason, most animation software does not permit changing a node's parent mid-animation.\]
+
+#### Controlling Hierarchies
+
+You will also improve the functionality of controllers to permit editing transformations in a hierarchy:
+
+- When models (whether objects or groups) are selected, the user should be able to manipulate them using the same controls that were available at the end of Assignment 1. However, models should inherit transformations applied to ther ancestors in the scene graph. In other words, transforming a node of the scene graph should effectively result in the same transformation being applied to the world coordinates of every descendant in the graph. 
 
 ## Software
 
-As with Assignment 1, you will implement this assignment as a web application using the `AniGraph` library.  The starter code is in [this repository](https://github.coecis.cornell.edu/CS4620-F2020/assignment2).  You'll recall that `AniGraph` is a Model-View-Controller system, meaning that any interactive element on the screen is produced by a model, which keeps track of its state; a related view, which manages the on-screen representation of the model; and a controller, which manages the relationship between them, in particular being responsible for how user input on the view causes changes to the model.
+As with Assignment 1, you will implement this assignment as a web application using the `AniGraph` library (now `AniGraphV2`).  The starter code is in [this repository](https://github.coecis.cornell.edu/CS4620-F2020/assignment2).  You'll recall that `AniGraph` is a Model-View-Controller system, meaning that each shape element on the screen is produced by a model, which keeps track of its state; a related view, which manages the on-screen representation of the model; and a controller, which facilitates communication between the model and view by way of user interaction.
+
+The main visual difference you will notice in the interface for Assignment 2 is the addition of the scene graph editor on the left:
+
+<!---
+Here
+-->
 
 ![image](imgs/SGEditorView.jpg)
  
