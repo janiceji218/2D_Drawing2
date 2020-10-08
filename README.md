@@ -72,67 +72,88 @@ As with Assignment 1, you will implement this assignment as a web application us
 
 The main visual difference you will notice in the interface for Assignment 2 is the addition of the scene graph editor on the left:
 
-<!---
-Here
--->
 
 ![image](imgs/SGEditorView.jpg)
+
+#### Running the Code:
+To run the code in A2, first fork the repository (see directions in [forking.md](forking.md)). Then run the following commands in the root directory (the directory with [package.json](package.json)) to download dependencies:
+```
+npm install
+git submodule update --init
+```
+To start the development server and run the code, use the command:
+```
+npm run start
+```
  
-In A2, you'll find the application, which is renderd by the code in `index.jsx` consists of three top-level components: 
-* an `A2ToolPanel`, which has all the familiar GUI controls from A1;
+#### Overview of Files
+ 
+The entry point for the core portion of the assignment is [`./ACode/src/index.jsx`](./ACode/src/index.jsx), which instantiates three top-level components: 
+* an `A2ToolPanel`, which has all buttons and other GUI elements you see at the top of the screen. These work much the same as they did in A1.
 * an `ASceneGraphEditor` which displays the hierarchy and lets the user manipulate it; and
 * an `A2GraphicsComponent` which is responsible for displaying the model.
-You don't actually have to do anything with the code for these components.
 
-In the code for `A2GraphicsComponent` the component sets itself up to use the model `A2Model`, the view `AView2D`, and the controller `A2DShapeController`.  This controller is a standard AniGraph controller that lets you supply "interactions" that define the start, move, and end callbacks for a particular mode of interaction; the provided A1-style interactions are defined in `ReferenceA1InteractionImplementations.js` and your new ones are in `SceneGraphElementInteractions.js`. The work of this assignment is all in the model and the interactions.
+You don't actually have to manipulate the code for these components. However, you are welcome to override parts of their implementation in the subclasses provided in [`./ACode/src/creative/`](./ACode/src/creative/) for the creative portion of the assignment.
+
+The `A2GraphicsComponent` manages a hierarchy of `A2Model`'s, which are connected to `AView2D` instances by way of `A2DShapeController`s. The `A2Model` that you will be modifying inherits from `AModel2D`, which now contains the features you implemented in Assignment 1.
+  
+  As you recall from Assignment 1, controllers assign `AInteraction`s to different views, with each `AInteraction` providing a different way to interact with the scene. In AniGraph V2, we define these each interaction in its own subclass so that we can reuse these definitions in multiple controllers. You will implement a few of these interactions in [`SceneGraphElementInteractions.js`](./ACode/src/interactions/SceneGraphElementInteractions.js). We have provided reference implementations of the interactions from A1 in the file [`ReferenceA1InteractionImplementations.js`](./ACode/src/creative/ReferenceA1InteractionImplementations.js), which are also used to give the starter code for A2 the same functionality you had at the end of A1. You can switch between these A1 controllers and the controllers you implement in A2 using the "EditMode" drowdown menu in the web application. You can change the default edit mode by editing the following lines from [A2GraphicsComponent.jsx](./A2Code/src/components/A2GraphicsComponent.jsx):
+  ```javascript
+        // Change which line is commented out below to change the default editing mode
+        this.switchToEditMode('A1Transform');
+        // this.switchToEditMode('Transform');
+```
+ 
+ The core portion of this assignment will involve implementing parts of `A2Model.js` and `SceneGraphElementInteractions.js`.
 
 ### Model
 
-The model is really the central class in this assignment.  It's worth studying carefully the code in `A2Model` and its superclasses, (it's not much code, really) because understanding how it works will be important for figuring out how to correctly carry out the tree operations that enable grouping and reparenting.
+The model is really the central class in this assignment.  It's probably worth studying the code in `A2Model` and its superclasses if you still feel confused about how models fit into the design of our application application (it's not much code, really).
 
-An important thing to realize about the design of this application is that (as in most scene graphs) the `AModel` class (really, its superclass `AObjectNode`) supports all nodes having a parent and children, and the `AModel2D` class supports all nodes containing shapes (represented as lists of vertices).  But these classes only keep track of individual node transformations and parent/child relationships; they don't know anything about transformation hierarchies.  Also, grouping involves creating empty scene graph nodes: group nodes have children but contain no geometry.  So in A2 we have two new subclasses for these two concepts.  `A2Model` is a subclass of `AModel2D` that overrides a number of methods to provide hierarchical transformations (in which a node's transformation applies to all its descendants); and `A2ModelGroup` is a subclass of `A2Model` that disallows adding geometry, to be used for group nodes.
+An important thing to realize about the design of this application is that (as in most scene graphs) the `AModel` class (really, its superclass `AObjectNode`) supports all nodes having a parent and children. The `AModel2D` class extends this to support defining a 2D shape (represented as lists of vertices).  But these classes only keep track of individual node transformations and parent/child relationships; they don't know anything about transformation hierarchies.  In this assignment you will extend `AModel2D` further to support transformation hierarchies in the `A2Model` class. 
 
-The operations provided by the model class for operating on the tree are pretty standard. The key tools are the methods of `AObjectNode`: `getParent`, `getChildren`, and `mapOverChildren` for traversing the hierarchy and `setParent`, `addChild`, and `removeChild` for editing it.  
+In addition to `A2Model`s, which represent nodes in our scene graph, we can represent "grouping" operations like you may be familiar with from applications like Powerpoint by making a group of models children of a new parent model that contains no geometry. In other words, you can think of groups as simply being additional parent nodes in our scene graph that don't have vertices. In practice, we implement this by making an `A2ModelGroup` class that extends `A2Model`. You do not have to edit the `A2ModelGroup` class, but it is provided in `A2Model.js` for your reference.
 
-The key things the model classes do are:
+The operations provided by the model class for operating on the tree are pretty standard. The key tools are the methods of `AObjectNode`: `getParent`, `getChildrenList`, and `mapOverChildren` for traversing the hierarchy and `setParent`, `addChild`, and `removeChild` for editing it. Your main task with regards to graph editing operations will be to implement the functions `removeFromParent` and `attachToNewParent` in `A2Model.js`.
 
-* override the various `get...Matrix` methods, `getVertices`, `get/setPosition`, and `getWorldSpaceBBoxCorners` so that they account for the transformations of their ancestor nodes.  Most of these are provided, but you need to implement `getObjectToWorldMatrix` and `get/setPosition`; you should study the provided implementations to understand how the tree operates.
-* override `removeFromParent` and `attachToNewParent` so that transformations are managed correctly when moving from one parent to another.  You need to implement these.
-* provide the callbacks `groupChildren` and `ungroupChildren`, which are called by the UI and are implemented in terms of `removeFromParent` and `attachToNewParent`.
-* provide a new method `getChildTreeObjectSpaceBoundingBox` that generalizes the notion of "object space corners" to return a box that encloses all the children.
+The key things that `A2Model` does that are different from what you saw in Assignment 1 are:
+
+* It overrides the various `get...Matrix` methods, `getVertices`, `get/setPosition`, and `getWorldSpaceBBoxCorners` so that they account for the transformations of their ancestor nodes.  Most of these are provided, but you need to implement `getObjectToWorldMatrix` and `get/setWorldPosition`; you should study the provided implementations of related functions to understand how the tree operates.
+* It overrides `removeFromParent` and `attachToNewParent` so that transformations are managed correctly when moving from one parent to another.  *You will need to implement these*.
+* It provides the callbacks `groupChildren` and `ungroupChildren`, which are called by the UI and are implemented in terms of `removeFromParent` and `attachToNewParent`.
+* It provide a new method `getChildTreeObjectSpaceBoundingBox` that generalizes the notion of "object space corners" to return a box that encloses all the descendants of a given model.
 
 What you implement in A2Model includes three kinds of functions:
 
 * Functions that deal with transformations between object and world space:
   - The override `getObjectToWorldMatrix` that replaces the original version that just returns the object's matrix (which now is only a transformation from a node's object space to its parent's object space).
-  - The overrides `getWorldPosition` and `getWorldPosition` that replace the superclass versions that simply get and set the `position` property.
+  - The overrides `getWorldPosition` and `setWorldPosition` that replace the superclass versions that simply get and set the `position` property, as `getPostition` and `setPosition` did in A1.
 * Functions that deal with bounding boxes:
-  - The method `getChildTreeObjectSpaceBoundingBox`, which initially just returns the `objectSpaceCorners` array that you'll remember from A1.  For a node without children this is correct, but for a node with children, the bounding box needs to be enlarged to also bound the children.  It's easiest to do this by making the box bound the _bounding boxes_ of the children, which you can get with a recursive call.
-  - The method `recenterAnchorInSubtree` which is used to compute a convenient initial location for the anchor in a newly created group.
+  - The method `getChildTreeObjectSpaceBoundingBox`, which initially just returns the `objectSpaceCorners` array that you'll remember from A1.  For a node without children this is correct, but for a node with children, the bounding box needs to be enlarged to also bound the bounding boxes of each descendant, which can be computed recursively.
+  - The method `recenterAnchorInSubtree` which is used to compute a convenient initial location for the anchor in newly created groups.
 * Functions for editing the scene graph:
-  - `removeFromParent`, which clears the parent of an object and updates its transformation to the transformation that would be correct if the parent was the root.
-  - `attachToNewParent`, which sets the parent of a parent-less node and updates its transformation so that the object remains in the same location.
+  - `removeFromParent`, which removes a child node from its parent. The basic graph operation is already implemented, but you will need to update any object matrices necessary to adhere to our 'golden rule'. Here, assume that having no parent is equivalent to having the root node as a parent (assuming the root node has the Identity as its matrix). 
+  - `attachToNewParent`, which sets the parent of a parent-less node and updates any matrices necessary to adhere to our `golden rule` (i.e., the geometry and anchor points of our shape should not change).
 
 More details and implementation hints can be found in the comments in the source file.
 
-Once your graph editing opertaions work, you will be able to parent an object to another one using the scene graph editor.  If you see afterwards that the object is indeed a child of the correct node, and it has not moved on the screen, you've won.  (Remember that if there are nonuniform scales inside the hierarchy (i.e. at nodes other than leaf nodes) it is OK for the object to move when it is not possible to keep it in place.)
-
-Also, once parenting works, grouping and ungrouping should also work, since those operations are already implemented in terms of parenting operations.
 
 ### Interactions
 
-The controller we are using delegates the handling of interaction to `Interaction` classes, and when you select the A2Controller interaction mode in the GUI, the `Interaction`s in  `SceneGraphElementInteractions.js` are active.  There are three of them, and their basic form is familiar from A1, though the details are a little different:
+The controllers we are using delegate the handling of interaction to `AInteraction` subclassesclasses. The ones you are writing can be found in `SceneGraphElementInteractions.js` and are active when you switch to the "Transform" edit mode using the "EditMode" dropdown menu in that application (see note above about how to make this the default mode once you are finished with the `A2Model` portion of the assignment).  There are three interactions for you to finish implementing. Their basic form should be familiar to you from Assignment 1, though some details will be a little different:
 
-* `DragToScaleAroundWorldPointInteraction` is the drag interaction responsible for mouse input on the bounding box selection handles.  It works very much like the A1 version, with `dragStart`, `dragMove`, and `dragEnd` callbacks.  You should model your implementation on the provided reference implementation of the A1 behavior (in `ReferenceA1InteractionImplementations.js`), but it needs to still work when you select objects that have parents with any kind of transformation.
+* `DragToScaleAroundWorldPointInteraction` is the drag interaction responsible for mouse input on the bounding box selection handles.  It works very much like the A1 scale interactions, with `dragStart`, `dragMove`, and `dragEnd` callbacks.  You should model your implementation on the provided reference implementation of the A1 behavior (in `ReferenceA1InteractionImplementations.js`), taking care to account for hierarchical transformations. See our demos for reference (for now, the demos from section; we'll try to release a shorter separate video later this week for convenience).
 
-* `AIDragToMovePosition` and `AIDragToMoveAnchorPoint` are the interactions responsible for moving objects (changing their positions) and moving anchor points.  Again study the A1 reference implementations first, then construct a version that works underneath parent transformations.  The implementations of these classes can be very short.
+* `AIDragToMovePosition` and `AIDragToMoveAnchorPoint` are the interactions responsible for moving objects (changing their positions) and moving anchor points.  Again study the A1 reference implementations first, then construct a version that works on hierarchies.  Note that the implementations of these classes can be very short if you have implemented `A2Model` correctly.
 
 
 
 ## Creative portion
 
-There are two ways to go with the creative portion.  One is to use your completed tool to build an articulated character.  It should be at least as complex as a simple humanoid figure with joints at the shoulders/hips, elbows/knees, wrists/ankles, and neck.  But it doesn’t have to be humanoid.  Cats? Dogs?  These have similar skeletal structure but rather different proportions.  Birds? Fish? Cephalopods? These might need different sets of joints.  Weird robots and monsters?  Who knows.  Show us your character or creature in a few different poses.
+There are two ways to go with the creative portion.  One is to use your completed tool to build an interesting articulated character or scene.  It should be at least as complex as a simple humanoid figure with joints at the shoulders/hips, elbows/knees, wrists/ankles, and neck, etc.  But it doesn’t have to be humanoid.  Cats? Dogs?  These have similar skeletal structure but rather different proportions.  Birds? Fish? Cephalopods? These might need different sets of joints.  Weird robots and monsters?  Who knows.  Show us how your character or creature moves, and how this relates to the structure of your transformation hierarchy.
 
-Alternatively you can add a new manipulation feature to the program.  Maybe you can control rotations with a more direct interface than the slider?  Maybe you don’t like the scaling interface with bounding boxes (though you still need to support those for the specified part) and want to provide an alternative scaling mode.  Maybe you’d like to make an interface that works nicely on a touchscreen device and uses multi-touch gestures to control transformations in a really intuitive way.  There is a lot of running room here once you have a controller attached to a model.
+Another option is to add a new feature to the program.  Maybe you can control rotations with a more direct interface than the slider?  Maybe you don’t like the scaling interface with bounding boxes (though you still need to support those for the specified part) and want to provide an alternative scaling mode.  Maybe you’d like to make an interface that works nicely on a touchscreen device and uses multi-touch gestures to control transformations in a really intuitive way.  There is a lot of running room here once you have a controller attached to a model.
 
-In addition to including the implementation in your zip file handin, you’ll turn in either a 1-minute video with a demo and explanation, or a 2-page report with screenshots and explanation.
+Finally, for practicum and other more advanced students, we will cover some additional short topics in the next few days, which you can implement as more advanced features. Mode details on this will follow.  
+
+In addition to including the implementation in your zip file handin, you’ll turn in either a short 1-minute video with a demo and explanation, or a 2-page report with screenshots and explanation. As with Assignment 1, if your implementation is especially complex, you may include the video as well as assitional details in a report (in this case, mention it in the video so we know to look at the report).
