@@ -175,9 +175,14 @@ export default class A2Model extends AModel2D{
      */
     getObjectToWorldMatrix(){
         //A2 Implement
-
+        let mat = this.matrix;
+        if (this.getParent() === undefined)
+            this.matrix;
+        else {
+            mat = this.getParent().getObjectToWorldMatrix().times(mat);
+        }
         //you should REPLACE the line below with your own code.
-        return super.getObjectToWorldMatrix();
+        return mat;
     }
 
     //The inverse transformation: WorldToObject is defined as below.
