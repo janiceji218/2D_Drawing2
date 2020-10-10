@@ -213,14 +213,13 @@ export default class A2Model extends AModel2D{
      */
     removeFromParent() {
         //A2 Implement
-        //unfinished
-        let origPos = new Vec3(this.getPosition().x, this.getPosition.y, 1);
+        let origPos = new Vec2(this.getPosition().x, this.getPosition.y);
         let origMat = this.getObjectToWorldMatrix();
+        let RSA = origMat.times(Matrix3x3.Translation(origPos).getInverse());
         let newPos = origPos.times(origMat.getInverse());
         let newPosMat = Matrix3x3.Translation(newPos.x, newPos.y);
         this.setParent(undefined);
-        this.setMatrixAndPosition();
-        this.matrix = origMat.times(newPosMat);
+        this.setMatrixAndPosition(RSA.times(newPosMat), newPos);
         super.removeFromParent(); // Do NOT delete this line! Add your code above it.
     }
 
