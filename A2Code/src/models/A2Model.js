@@ -284,6 +284,10 @@ export default class A2Model extends AModel2D{
      */
     recenterAnchorInSubtree(){
         //A2 Implement
+        let bounds = this.getChildTreeWorldSpaceBoundingBox();
+        let x = (bounds[0].x + bounds[1].x) / 2.0;
+        let y = (bounds[0].y + bounds[3].y) / 2.0;
+
     }
 
 
@@ -320,6 +324,8 @@ export default class A2Model extends AModel2D{
      * Vec2(minX, maxY)]
      * @returns {Vec2[]}
      */
+
+
     getChildTreeObjectSpaceBoundingBox(){
         //A2 Implement
         let pts = this.objectSpaceCorners;
@@ -338,7 +344,7 @@ export default class A2Model extends AModel2D{
             ]
         }
 
-        let childrenPts = this.mapOverChildren(child => {return child.matrix.applyToPoints(child.getChildTreeObjectSpaceBoundingBox())});//.flat();
+        let childrenPts = this.mapOverChildren(child => {return child.matrix.applyToPoints(child.getChildTreeObjectSpaceBoundingBox())});
         pts.concat(childrenPts);
     }
     //################################################################################################################################################################
