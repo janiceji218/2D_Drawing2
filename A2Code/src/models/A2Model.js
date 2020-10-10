@@ -177,14 +177,13 @@ export default class A2Model extends AModel2D{
     getObjectToWorldMatrix(){
         //A2 Implement
         let mat = this.matrix;
-        if (this.getParent() === undefined)
-            return this.matrix;
+        if (!this.getParent())
+            return mat;
         else
-            mat = this.getParent().getObjectToWorldMatrix().times(mat);
+            return this.getParent().getObjectToWorldMatrix().times(mat);
 
         //you should REPLACE the line below with your own code.
         //return super.getObjectToWorldMatrix();
-        return mat;
     }
 
     //The inverse transformation: WorldToObject is defined as below.
@@ -213,13 +212,10 @@ export default class A2Model extends AModel2D{
      */
     removeFromParent() {
         //A2 Implement
-        let origPos = new Vec2(this.getPosition().x, this.getPosition.y);
-        let origMat = this.getObjectToWorldMatrix();
-        let RSA = origMat.times(Matrix3x3.Translation(origPos).getInverse());
-        let newPos = origPos.times(origMat.getInverse());
-        let newPosMat = Matrix3x3.Translation(newPos.x, newPos.y);
+        let toWorld = this.getObjectToWorldMatrix();
+        let newPos = this.getParentSpaceMatrix().times(this.getPosition());
         this.setParent(undefined);
-        this.setMatrixAndPosition(RSA.times(newPosMat), newPos);
+        this.setMatrixAndPosition(toWorld, newPos);
         super.removeFromParent(); // Do NOT delete this line! Add your code above it.
     }
 
@@ -236,7 +232,9 @@ export default class A2Model extends AModel2D{
      */
     attachToNewParent(newParent) {
         //A2 Implement
-
+        let toWorld = newParent.getObjectToWorldMatrix().getInverse().times(this.getObjectToWorldMatrix());
+        let newPos = newParent.getObjectToWorldMatrix().getInverse().times(this.getPosition());
+        this.setMatrixAndPosition(toWorld, newPos);
         super.attachToNewParent(newParent); // Do not delete this line! Add your code above it.
     }
 
