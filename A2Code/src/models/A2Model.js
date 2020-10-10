@@ -247,9 +247,10 @@ export default class A2Model extends AModel2D{
      * @returns {*}
      */
     getWorldPosition() {
-        //A2 Implement
-
-        return super.getWorldPosition(); //REPLACE this line with your own implementation!
+        if (!this.getParent()){
+            return this.getPosition();
+        }
+        return this.getParentSpaceMatrix().times(this.getPosition());
     }
 
     /**
@@ -263,9 +264,12 @@ export default class A2Model extends AModel2D{
      * @param update
      */
     setWorldPosition(position, update= true){
-        //A2 Implement
-
-        super.setWorldPosition(position, update);//REPLACE this line with your own implementation!
+        if (!this.getParent()){
+            this.setPosition(position, update)
+        }
+        else {
+            this.setPosition(this.getParentSpaceMatrix().getInverse().times(position), update);
+        }
     }
 
     /**
