@@ -327,9 +327,11 @@ export default class A2Model extends AModel2D{
         }
 
         // have to account for parent's transformations somehow??
-        let childrenPts = this.getChildrenList.map(child => {return child.getChildTreeObjectSpaceBoundingBox()}).flat();
-        debugger;
-        let extrema = Vec2.GetPointBounds(this.getParentSpaceMatrix().applyToPoints(childrenPts));
+        let childrenPts = this.getChildrenList().map(child => {return child.getChildTreeObjectSpaceBoundingBox()}).flat();
+        let extrema = Vec2.GetPointBounds(childrenPts);
+        if (this.getParent()) {
+            extrema = Vec2.GetPointBounds(this.getParentSpaceMatrix().getInverse().applyToPoints(childrenPts));
+        }
 
         let currPointBounds = Vec2.GetPointBounds(this.objectSpaceCorners);
         let minX = Math.min(currPointBounds[0][0], extrema[0][0]);
