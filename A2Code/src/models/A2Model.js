@@ -5,6 +5,7 @@ import {
     AModel2D,
     AObject
 } from "AniGraph"
+import Vec3 from "../../../../assignment0/src/math/Vec3";
 
 export default class A2Model extends AModel2D{
 
@@ -177,11 +178,12 @@ export default class A2Model extends AModel2D{
         //A2 Implement
         let mat = this.matrix;
         if (this.getParent() === undefined)
-            this.matrix;
-        else {
+            return this.matrix;
+        else
             mat = this.getParent().getObjectToWorldMatrix().times(mat);
-        }
+
         //you should REPLACE the line below with your own code.
+        //return super.getObjectToWorldMatrix();
         return mat;
     }
 
@@ -211,7 +213,14 @@ export default class A2Model extends AModel2D{
      */
     removeFromParent() {
         //A2 Implement
-
+        //unfinished
+        let origPos = new Vec3(this.getPosition().x, this.getPosition.y, 1);
+        let origMat = this.getObjectToWorldMatrix();
+        let newPos = origPos.times(origMat.getInverse());
+        let newPosMat = Matrix3x3.Translation(newPos.x, newPos.y);
+        this.setParent(undefined);
+        this.setMatrixAndPosition();
+        this.matrix = origMat.times(newPosMat);
         super.removeFromParent(); // Do NOT delete this line! Add your code above it.
     }
 
