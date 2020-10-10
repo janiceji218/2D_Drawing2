@@ -284,6 +284,10 @@ export default class A2Model extends AModel2D{
      */
     recenterAnchorInSubtree(){
         //A2 Implement
+        let bounds = this.getChildTreeWorldSpaceBoundingBox();
+        let x = (bounds[0].x + bounds[1].x) / 2.0;
+        let y = (bounds[0].y + bounds[3].y) / 2.0;
+
     }
 
 
@@ -320,27 +324,33 @@ export default class A2Model extends AModel2D{
      * Vec2(minX, maxY)]
      * @returns {Vec2[]}
      */
+
+
     getChildTreeObjectSpaceBoundingBox(){
         //A2 Implement
+        let pts = this.objectSpaceCorners;
+
         if (this.getChildrenList().length === 0){
-            return this.objectSpaceCorners;
+            let minX = Vec2.GetPointBounds(pts)[0].x;
+            let minY = Vec2.GetPointBounds(pts)[0].y;
+            let maxX = Vec2.GetPointBounds(pts)[1].x;
+            let maxY = Vec2.GetPointBounds(pts)[1].y;
+
+            return [
+                new Vec2(minX, minY),
+                new Vec2(maxX, minY),
+                new Vec2(maxX, maxY),
+                new Vec2(minX, maxY)
+            ]
         }
 
-        let childrenPts = this.getChildrenList().map(child => {return child.getChildTreeObjectSpaceBoundingBox()}).flat();
-        let extrema = Vec2.GetPointBounds(this.getObjectToWorldMatrix().getInverse().applyToPoints(childrenPts));
+        let childrenPts = this.mapOverChildren(child => {return child.matrix.applyToPoints(child.getChildTreeObjectSpaceBoundingBox())});//.flat();
+        pts.concat(childrenPts);
 
-        let currPointBounds = Vec2.GetPointBounds(this.objectSpaceCorners);
-        let minX = Math.min(currPointBounds[0][0], extrema[0][0]);
-        let minY = Math.min(currPointBounds[0][1], extrema[0][1]);
-        let maxX = Math.max(currPointBounds[1][0], extrema[1][0]);
-        let maxY = Math.max(currPointBounds[1][1], extrema[1][1]);
+        //let childrenPts = this.getChildrenList().map(child => {return child.getChildTreeObjectSpaceBoundingBox()}).flat();
 
-        return [
-            new Vec2(minX, minY),
-            new Vec2(maxX, minY),
-            new Vec2(maxX, maxY),
-            new Vec2(minX, maxY)
-        ]
+        //let extrema = Vec2.GetPointBounds(this.getObjectToWorldMatrix().getInverse().applyToPoints(childrenPts));
+
     }
     //################################################################################################################################################################
     //######################################################\\--Implement missing code in the section above--///######################################################
