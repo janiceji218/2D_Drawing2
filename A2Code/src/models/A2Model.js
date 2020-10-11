@@ -284,15 +284,20 @@ export default class A2Model extends AModel2D{
      */
     recenterAnchorInSubtree(){
         //A2 Implement
-        let bounds = this.getObjectToWorldMatrix().applyToPoints(this.getChildTreeWorldSpaceBoundingBox());
+        if (this.getChildrenList().length === 0){
+            this.setWorldPosition(this.getParent().getWorldPosition());
+        }
+        else {
+            let bounds = this.getChildTreeWorldSpaceBoundingBox();
 
-        let x = (bounds[0].x + bounds[1].x) / 2.0;
-        let y = (bounds[0].y + bounds[3].y) / 2.0;
+            let x = (bounds[0].x + bounds[1].x) / 2.0;
+            let y = (bounds[0].y + bounds[3].y) / 2.0;
 
-        this.setWorldPosition(new Vec2(x, y), false);
-        this.mapOverChildren(child => {
-            child.setWorldPosition(new Vec2(x, y), false);
-        });
+            this.setWorldPosition(new Vec2(x, y), false);
+            this.mapOverChildren(child => {
+                child.setWorldPosition(new Vec2(x, y), false);
+            });
+        }
     }
 
 
@@ -333,14 +338,13 @@ export default class A2Model extends AModel2D{
 
     getChildTreeObjectSpaceBoundingBox(){
         //A2 Implement
-        /*
         let pts = this.objectSpaceCorners;
 
         if (this.getChildrenList().length === 0){
-            let minX = Vec2.GetPointBounds(pts)[0].x;
-            let minY = Vec2.GetPointBounds(pts)[0].y;
-            let maxX = Vec2.GetPointBounds(pts)[1].x;
-            let maxY = Vec2.GetPointBounds(pts)[1].y;
+            let minX = Vec2.GetPointBounds(pts)[0][0];
+            let minY = Vec2.GetPointBounds(pts)[0][1];
+            let maxX = Vec2.GetPointBounds(pts)[1][0];
+            let maxY = Vec2.GetPointBounds(pts)[1][1];
 
             return [
                 new Vec2(minX, minY),
@@ -350,32 +354,34 @@ export default class A2Model extends AModel2D{
             ]
         }
 
-        let childrenPts = this.mapOverChildren(child => {return child.matrix.applyToPoints(child.getChildTreeObjectSpaceBoundingBox())});
-        pts.concat(childrenPts);
-
-         */
-        let pts = this.objectSpaceCorners;
-        if (this.getChildrenList().length === 0) {
-            return pts;
-        }
-
         this.mapOverChildren(child => {
             let childBB = child.getChildTreeObjectSpaceBoundingBox();
             let mat = child.matrix;
             pts.concat(mat.applyToPoints(childBB));
         });
 
-        let minX = Vec2.GetPointBounds(pts)[0].x;
-        let minY = Vec2.GetPointBounds(pts)[0].y;
-        let maxX = Vec2.GetPointBounds(pts)[1].x;
-        let maxY = Vec2.GetPointBounds(pts)[1].y;
-
-        return [
-            new Vec2(minX, minY),
-            new Vec2(maxX, minY),
-            new Vec2(maxX, maxY),
-            new Vec2(minX, maxY)
-        ];
+        // let pts = this.objectSpaceCorners;
+        // if (this.getChildrenList().length === 0) {
+        //     return pts;
+        // }
+        //
+        // this.mapOverChildren(child => {
+        //     let childBB = child.getChildTreeObjectSpaceBoundingBox();
+        //     let mat = child.matrix;
+        //     pts.concat(mat.applyToPoints(childBB));
+        // });
+        //
+        // let minX = Vec2.GetPointBounds(pts)[0][0];
+        // let minY = Vec2.GetPointBounds(pts)[0][1];
+        // let maxX = Vec2.GetPointBounds(pts)[1][0];
+        // let maxY = Vec2.GetPointBounds(pts)[1][1];
+        //
+        // return [
+        //     new Vec2(minX, minY),
+        //     new Vec2(maxX, minY),
+        //     new Vec2(maxX, maxY),
+        //     new Vec2(minX, maxY)
+        // ];
     }
     //################################################################################################################################################################
     //######################################################\\--Implement missing code in the section above--///######################################################
