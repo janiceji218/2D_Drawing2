@@ -40,8 +40,34 @@ These objects in their local coordinates have the dimensions shown here:
 Hint: You will want to write out the matrices for each object according to its properties.
 
 ### 1.1: reparenting
+Reparenting refers to changing the parent of an object in the hierarchy. Suppose we have the following hierarchy: 
+~~~
+root (identity matrix)
+ |
+ + circle 
+   |
+   + triangle 
+     |
+     + square 
+       | 
+       + rectangle 
+~~~
 
-Now suppose the square is reparented to the circle.  
+What happens if we reparent the rectangle to the triangle? Currently, the rectangle's parent is a square, so in order for the rectangle's parent to be the triangle, we need to bump it up a level.
+~~~
+root (identity matrix)
+ |
+ + circle 
+   |
+   + triangle 
+     |
+     + square
+     | 
+     + rectangle
+~~~
+This will modify the rectangle's object to world matrix. 
+
+Now suppose the square is reparented to the circle in the heirarchy given for the first part of this question.  
 
 (a) Draw the tree afterwards.
 
@@ -80,7 +106,7 @@ root (identity matrix)
      |
      + C square p=(4,3) r=0 s=(2,2) a=(0,0) (translated identity, scaled up by 2)
      |
-     + D square p=(5,2) r=45 s=(1,1) a=(0,0) (translated identity, rotated 45 degrees)
+     + D square p=(5-sqrt(2)/2,2) r=45 s=(1,1) a=(0,0) (translated identity, rotated 45 degrees)
 
 ~~~
 
@@ -90,7 +116,7 @@ root (identity matrix)
 
 (c) How does this box change if I apply a translation to D in the +x direction?  What about in the -x direction?  (Note that we are only asking you to translate D by a limited distance and see whether you can keep the bounding box size unchanged. Is it possible at all in one of the directions?)
 
-(d) Suppose I apply a 45 degree rotation to node A.  Then what are the answers to (a)?  How does this answer differ from the one your program will compute (by the method of making boxes that bound the bounding boxes of the children, rather than exactly bounding the geometry)?
+(d) Suppose I apply a 45 degree rotation to node B.  Then what is the bounding box of the subtree rooted at A?  How does this answer differ from the one your program will compute (by the method of making boxes that bound the bounding boxes of the children, rather than exactly bounding the geometry)?
 
 ## Problem 3: Controllers
 
