@@ -284,7 +284,7 @@ export default class A2Model extends AModel2D{
      */
     recenterAnchorInSubtree(){
         //A2 Implement
-        /*
+
         if (this.getChildrenList().length === 0){
             this.setWorldPosition(this.getWorldPosition());
         }
@@ -295,10 +295,7 @@ export default class A2Model extends AModel2D{
             let y = (bounds[0].y + bounds[3].y) / 2.0;
 
             this.setWorldPosition(new Vec2(x, y), false);
-            this.mapOverChildren(child => {
-                child.setWorldPosition(new Vec2(x, y), false);
-            });
-        }*/
+        }
     }
 
 
