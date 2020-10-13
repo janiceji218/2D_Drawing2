@@ -25,7 +25,6 @@ export default class A2CreativeComponent extends AGraphicsComponent2D {
     }
 
     addViewClass(vclass){
-        console.log(vclass.name);
         this.viewClassesDict[vclass.name]=vclass;
         AObject.RegisterClass(vclass);
     }
