@@ -80,11 +80,13 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             var rescaleX = Precision.signedTiny(newCursor.x)/denomX;
             var rescaleY = Precision.signedTiny(newCursor.y)/denomY;
 
+            /*
             if(event.shiftKey != !!interaction.controller.getModel().isModelGroup){
                 const absval = Math.max(Math.abs(Precision.signedTiny(rescaleX)), Math.abs(Precision.signedTiny(rescaleY)));
                 rescaleX = rescaleX<0? -absval : absval;
                 rescaleY = rescaleY<0? -absval : absval;
             }
+            */
 
             interaction.controller.getModel().setMatrix(interaction.TR.times(
                 Matrix3x3.Scale(rescaleX, rescaleY)).times(
