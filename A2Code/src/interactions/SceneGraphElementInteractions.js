@@ -50,10 +50,9 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
 
             interaction.startTransformOrigin = interaction.getTransformOriginInWorldCoordinates();
             interaction.scaleSpace=
-                interaction.parentMatrix.getInverse().times(
-                    Matrix3x3.Translation(interaction.startTransformOrigin).times(
+                Matrix3x3.Translation(interaction.startTransformOrigin).times(
                         Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
-                    ))
+                    );
 
             interaction.scaleSpacei=interaction.scaleSpace.getInverse();
             interaction.startMatrix = interaction.controller.getModel().matrix;
@@ -67,7 +66,7 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             event.preventDefault();
             //A2 Implement
 
-            const newCursor = interaction.scaleSpacei.times(interaction.getEventPositionInContext(event));
+            const newCursor = interaction.scaleSpacei.times(interaction.getEventPositionInContext(event).times(interaction.worldToParentMatrix));
 
             const denomX = Precision.signedTiny(interaction.startCursorScaleCoords.x);
             const denomY = Precision.signedTiny(interaction.startCursorScaleCoords.y);
