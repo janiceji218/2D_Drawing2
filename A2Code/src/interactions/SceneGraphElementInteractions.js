@@ -43,16 +43,24 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             event.preventDefault();
             //A2 Implement
             interaction.startCursor = interaction.getEventPositionInContext(event);
-            interaction.startTransformOrigin = interaction.getTransformOriginInWorldCoordinates();
-            interaction.TR=Matrix3x3.Translation(interaction.startTransformOrigin).times(
-                Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
-            );
 
-            interaction.RiTi=interaction.TR.getInverse();
-            interaction.startMatrix = interaction.controller.getModel().matrix;
+            interaction.parentMatrix = interaction.controller.getModel().getParent().matrix;
             interaction.worldToParentMatrix = interaction.controller.getModel().getParent().getWorldToObjectMatrix();
+            interaction.parentToWorldMatrix = interaction.controller.getModel().getParent().getObjectToWorldMatrix();
 
-            interaction.startCursorScaleCoords = interaction.RiTi.times(interaction.worldToParentMatrix.times(interaction.startCursor));
+            interaction.startTransformOrigin = interaction.getTransformOriginInWorldCoordinates();
+            interaction.scaleSpace=
+                Matrix3x3.Translation(interaction.startTransformOrigin).times(
+                    interaction.worldToParentMatrix.times(
+                    Matrix3x3.Translation(interaction.controller.getModel().getPosition()).times(
+                    Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
+            )));
+
+            interaction.scaleSpacei=interaction.scaleSpace.getInverse();
+            interaction.startMatrix = interaction.controller.getModel().matrix;
+
+
+            interaction.startCursorScaleCoords = interaction.scaleSpacei.times(interaction.startCursor);
         });
 
         // Now define a drag move callback
@@ -60,7 +68,7 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             event.preventDefault();
             //A2 Implement
 
-            const newCursor = interaction.RiTi.times(interaction.worldToParentMatrix.times(interaction.getEventPositionInContext(event)));
+            const newCursor = interaction.scaleSpacei.times(interaction.getEventPositionInContext(event));
 
             const denomX = Precision.signedTiny(interaction.startCursorScaleCoords.x);
             const denomY = Precision.signedTiny(interaction.startCursorScaleCoords.y);
@@ -72,6 +80,12 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
                 rescaleX = rescaleX<0? -absval : absval;
                 rescaleY = rescaleY<0? -absval : absval;
             }
+
+            interaction.controller.getModel().setMatrix(interaction.scaleSpace.times(
+                Matrix3x3.Scale(rescaleX, rescaleY)).times(
+                interaction.scaleSpacei
+                ).times(interaction.startMatrix)
+            );
         });
 
         // We can optionally define a drag end callback
