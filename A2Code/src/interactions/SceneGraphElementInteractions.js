@@ -58,6 +58,11 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             interaction.scaleSpacei=interaction.scaleSpace.getInverse();
             interaction.startMatrix = interaction.controller.getModel().matrix;
 
+            interaction.TR=Matrix3x3.Translation(interaction.startTransformOrigin).times(
+                Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
+            );
+
+            interaction.RiTi=interaction.TR.getInverse();
 
             interaction.startCursorScaleCoords = interaction.scaleSpacei.times(interaction.startCursor);
             interaction.origScale = interaction.controller.getModel().getScale();
@@ -81,10 +86,11 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
                 rescaleY = rescaleY<0? -absval : absval;
             }
 
-            let scaleX = rescaleX * interaction.origScale.x;
-            let scaleY = rescaleY * interaction.origScale.y;
-
-            interaction.controller.getModel().setScale(scaleX, scaleY);
+            interaction.controller.getModel().setMatrix(interaction.TR.times(
+                Matrix3x3.Scale(rescaleX, rescaleY)).times(
+                interaction.RiTi
+                ).times(interaction.startMatrix)
+            );
 
         });
 
