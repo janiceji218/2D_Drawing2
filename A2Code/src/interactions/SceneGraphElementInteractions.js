@@ -50,12 +50,10 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
 
             interaction.startTransformOrigin = interaction.getTransformOriginInWorldCoordinates();
             interaction.scaleSpace=
-                Matrix3x3.Translation(interaction.startTransformOrigin).times(
-                    interaction.worldToParentMatrix.times(
-                        interaction.parentMatrix.times(
-                    Matrix3x3.Translation(interaction.controller.getModel().getPosition()).times(
-                    Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
-            ))));
+                interaction.parentMatrix.getInverse().times(
+                    Matrix3x3.Translation(interaction.startTransformOrigin).times(
+                        Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
+                    ))
 
             interaction.scaleSpacei=interaction.scaleSpace.getInverse();
             interaction.startMatrix = interaction.controller.getModel().matrix;
