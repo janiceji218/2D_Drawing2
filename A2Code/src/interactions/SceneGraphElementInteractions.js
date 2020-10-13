@@ -43,20 +43,25 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             event.preventDefault();
             //A2 Implement
             interaction.startCursor = interaction.getEventPositionInContext(event);
-            interaction.startTransformPosition = interaction.getPositionTranslation();
-            interaction.AR = Matrix3x3.Translation(interaction.startTransformPosition).times(
-                Matrix3x3.Rotation(interaction.controller.getModel().getRotation()));
+            interaction.startTransformOrigin = interaction.getTransformOriginInWorldCoordinates();
+            interaction.TR=Matrix3x3.Translation(interaction.startTransformOrigin).times(
+                Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
+            );
 
-            interaction.AiTi = interaction.AR.getInverse();
+            interaction.RiTi=interaction.TR.getInverse();
             interaction.startMatrix = interaction.controller.getModel().matrix;
-            interaction.startCursorScaleCoords = interaction.AiTi.times(interaction.startCursor);
+            interaction.worldToParentMatrix = interaction.controller.getModel().getParent().getWorldToObjectMatrix();
+
+            interaction.startCursorScaleCoords = interaction.RiTi.times(interaction.worldToParentMatrix.times(interaction.startCursor));
         });
 
         // Now define a drag move callback
         interaction.setDragMoveCallback(event=> {
             event.preventDefault();
             //A2 Implement
-            const newCursor = interaction.AiTi.times(interaction.getEventPositionInContext(event));
+
+            const newCursor = interaction.RiTi.times(interaction.worldToParentMatrix.times(interaction.getEventPositionInContext(event)));
+
             const denomX = Precision.signedTiny(interaction.startCursorScaleCoords.x);
             const denomY = Precision.signedTiny(interaction.startCursorScaleCoords.y);
             var rescaleX = Precision.signedTiny(newCursor.x)/denomX;
@@ -67,18 +72,6 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
                 rescaleX = rescaleX<0? -absval : absval;
                 rescaleY = rescaleY<0? -absval : absval;
             }
-            /*
-            let parent = interaction.controller.getModel();
-
-            parent.setMatrix(interaction.AR.times(
-                Matrix3x3.Scale(rescaleX, rescaleY)).times(
-                interaction.RiTi
-                ).times(interaction.startMatrix)
-            );
-
-            parent.mapOverChildren(child => {
-
-            });*/
         });
 
         // We can optionally define a drag end callback
@@ -104,8 +97,8 @@ export class AIDragToMovePosition extends ADragValueInteraction{
         //A2 Implement
         return this.controller.getModel().getWorldPosition();
     }
+
     setValueFunction(value){
-        //A2 Implement
         this.controller.getModel().setWorldPosition(value);
     }
 }
@@ -117,7 +110,6 @@ export class AIDragToMoveAnchorPoint extends ADragValueInteraction{
     }
 
     setValueFunction(value){
-        //A2 Implement
         this.controller.getModel().setWorldPosition(value, false);
         this.controller.getModel().updateMatrixProperties();
     }
