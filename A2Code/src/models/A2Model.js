@@ -36,7 +36,6 @@ export default class A2Model extends AModel2D{
     }
 
 
-
     /**
      * We are going to transform our points by the object to world matrix instead of just by the object matrix
      * @returns {*|undefined}
