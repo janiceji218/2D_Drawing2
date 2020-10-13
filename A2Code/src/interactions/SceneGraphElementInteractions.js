@@ -48,17 +48,19 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             interaction.worldToParentMatrix = interaction.controller.getModel().getParent().getWorldToObjectMatrix();
             interaction.parentToWorldMatrix = interaction.controller.getModel().getParent().getObjectToWorldMatrix();
 
-            interaction.startTransformOrigin = interaction.getTransformOriginInWorldCoordinates();
+            interaction.startTransformOrigin = interaction.controller.getModel().getPosition();
             interaction.scaleSpace=
-                Matrix3x3.Translation(interaction.startTransformOrigin).times(
+                interaction.parentToWorldMatrix.times(
+                    Matrix3x3.Translation(interaction.startTransformOrigin).times(
                         Matrix3x3.Rotation(interaction.controller.getModel().getRotation())
-                    );
+                    ))
 
             interaction.scaleSpacei=interaction.scaleSpace.getInverse();
             interaction.startMatrix = interaction.controller.getModel().matrix;
 
 
             interaction.startCursorScaleCoords = interaction.scaleSpacei.times(interaction.startCursor);
+            interaction.origScale = interaction.controller.getModel().getScale();
         });
 
         // Now define a drag move callback
@@ -66,7 +68,7 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
             event.preventDefault();
             //A2 Implement
 
-            const newCursor = interaction.scaleSpacei.times(interaction.getEventPositionInContext(event).times(interaction.worldToParentMatrix));
+            const newCursor = interaction.scaleSpacei.times(interaction.getEventPositionInContext(event));
 
             const denomX = Precision.signedTiny(interaction.startCursorScaleCoords.x);
             const denomY = Precision.signedTiny(interaction.startCursorScaleCoords.y);
@@ -79,11 +81,11 @@ export class DragToScaleAroundWorldPointInteraction extends ADragInteraction{
                 rescaleY = rescaleY<0? -absval : absval;
             }
 
-            interaction.controller.getModel().setMatrix(interaction.scaleSpace.times(
-                Matrix3x3.Scale(rescaleX, rescaleY)).times(
-                interaction.scaleSpacei
-                ).times(interaction.startMatrix)
-            );
+            let scaleX = rescaleX * interaction.origScale.x;
+            let scaleY = rescaleY * interaction.origScale.y;
+
+            interaction.controller.getModel().setScale(scaleX, scaleY);
+
         });
 
         // We can optionally define a drag end callback
