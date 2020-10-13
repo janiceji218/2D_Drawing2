@@ -53,10 +53,9 @@ export default class A2GraphicsComponent extends A2DShapeEditorComponent{
             groupBoxInteractionClasses: [AIDragToMovePosition]
         }));
 
-        // Here you can set the default edit mode to whichever one you are currently working on
+        // Change which line is commented out below to change the default editing mode
         this.switchToEditMode('A1Transform');
         // this.switchToEditMode('Transform');
-        // this.switchToEditMode('Isolation Mode');
 
         this.setCurrentSelectionMode("Single");
     }
@@ -73,7 +72,7 @@ export default class A2GraphicsComponent extends A2DShapeEditorComponent{
 
         this.defineSelectionMode('Group', {
             getWorldSpaceBoundingBox: function(){
-                return component.getSelectedModel().getGroupWorldSpaceBoundingBox();
+                return component.getSelectedModel().getChildTreeWorldSpaceBoundingBox();
             },
             selectController: function(controller){
                 function groupsearch(c){
