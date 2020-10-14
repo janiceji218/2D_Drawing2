@@ -4,12 +4,33 @@ import {
     Matrix3x3,
     VecEqual,
     MatrixEqual,
-    AObjectJSONEqual
 } from "AniGraph"
+
+
+export const AObjectJSONEqual = {
+    AObjectJSONEqual(msg, objectA, objectB) {
+        const pass = objectA.getJSONString()==objectB.getJSONString();
+        if (pass) {
+            return {
+                message: () =>
+                    `${objectA}.getJSONString() == ${objectB}.getJSONString()`,
+                pass: true,
+            };
+        } else {
+            return {
+                message: () =>
+                    `${objectA}.getJSONString() != ${objectB}.getJSONString()`,
+                pass: false,
+            };
+        }
+    }
+}
+
+expect.extend(AObjectJSONEqual);
+
 
 import {A2Model} from "A2Code";
 
-expect.extend(AObjectJSONEqual);
 const TestClass = A2Model;
 
 describe(`AObject Test for ${TestClass.name}`, ()=>{

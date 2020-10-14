@@ -1,6 +1,9 @@
 {
   "rootDir": "../",
   "testRegex": "((\\.|/*.)(test))\\.js?$",
+  "testPathIgnorePatterns": [
+    "/AniGraphV2/"
+  ],
   "moduleNameMapper": {
     "\\.(css|less)$": "identity-obj-proxy",
     "\\.(gif|ttf|eot|svg)$": "<rootDir>/tests/__mocks__/fileMock.js"
