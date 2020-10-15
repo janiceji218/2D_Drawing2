@@ -6,6 +6,7 @@ import {
     MatrixEqual
 } from "AniGraph"
 
+
 export const AObjectJSONEqual = {
     AObjectJSONEqual(msg, objectA, objectB) {
         const pass = objectA.getJSONString()==objectB.getJSONString();
@@ -25,9 +26,11 @@ export const AObjectJSONEqual = {
     }
 }
 
+expect.extend(AObjectJSONEqual);
+
+
 import {A2Model} from "A2Code";
 
-expect.extend(AObjectJSONEqual);
 const TestClass = A2Model;
 
 describe(`AObject Test for ${TestClass.name}`, ()=>{
