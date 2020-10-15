@@ -3,9 +3,27 @@ import {
     Vec2,
     Matrix3x3,
     VecEqual,
-    MatrixEqual,
-    AObjectJSONEqual
+    MatrixEqual
 } from "AniGraph"
+
+export const AObjectJSONEqual = {
+    AObjectJSONEqual(msg, objectA, objectB) {
+        const pass = objectA.getJSONString()==objectB.getJSONString();
+        if (pass) {
+            return {
+                message: () =>
+                    `${objectA}.getJSONString() == ${objectB}.getJSONString()`,
+                pass: true,
+            };
+        } else {
+            return {
+                message: () =>
+                    `${objectA}.getJSONString() != ${objectB}.getJSONString()`,
+                pass: false,
+            };
+        }
+    }
+}
 
 import {A2Model} from "A2Code";
 
