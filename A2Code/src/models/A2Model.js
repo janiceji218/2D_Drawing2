@@ -231,9 +231,13 @@ export default class A2Model extends AModel2D{
      */
     attachToNewParent(newParent) {
         //A2 Implement
-        let toWorld = newParent.getObjectToWorldMatrix().getInverse().times(this.getObjectToWorldMatrix());
-        let newPos = newParent.getObjectToWorldMatrix().getInverse().times(this.getPosition());
-        this.setMatrixAndPosition(toWorld, newPos);
+        let WtoObj = newParent.getWorldToObjectMatrix()
+        let newPos = WtoObj.times(this.getPosition());
+
+
+        // let toWorld = newParent.getObjectToWorldMatrix().getInverse().times(this.getObjectToWorldMatrix());
+        // let newPos = newParent.getObjectToWorldMatrix().getInverse().times(this.getPosition());
+        this.setMatrixAndPosition(WtoObj.times(this.matrix), newPos);
         super.attachToNewParent(newParent); // Do not delete this line! Add your code above it.
     }
 
